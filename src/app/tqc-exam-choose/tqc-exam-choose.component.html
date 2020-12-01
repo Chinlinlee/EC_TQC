@@ -1,0 +1,72 @@
+<h1>選擇練習題目</h1>
+<div class="container border border-primary mt-2 pb-2">
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <label for="">練習題數:</label>
+                <input type="text" class="form-control" name="" id="inputExamNum" aria-describedby="helpId" placeholder="" [(ngModel)]="examNum" [ngClass]="{'form-control-error': examNumError||chooseNumError}" (ngModelChange)="ngOnExamNumChanges($event)">
+            </div>
+            <p style="color: red;" *ngIf="examNumError">請輸入正整數</p>
+            <p style="color: red;" *ngIf="chooseNumError">請輸入正確範圍(1~{{chooseNum}})</p>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" 
+                        [(ngModel)]="chooseCategory.one" (ngModelChange)="ngOnChooseCategoryChanges($event)">
+                    第一類 , 共{{categoryNumObj.first}}題
+                </label>
+                <br />
+                <label class="form-check-label" >
+                    <input type="checkbox" class="form-check-input" 
+                        [(ngModel)]="chooseCategory.two" (ngModelChange)="ngOnChooseCategoryChanges($event)">
+                    第二類 , 共{{categoryNumObj.second}}題
+                </label>
+                <br />
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" 
+                        [(ngModel)]="chooseCategory.three" (ngModelChange)="ngOnChooseCategoryChanges($event)">
+                    第三類 , 共{{categoryNumObj.thirth}}題
+                </label>
+                <br />
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input"  
+                        [(ngModel)]="chooseCategory.four" (ngModelChange)="ngOnChooseCategoryChanges($event)">
+                    第四類 , 共{{categoryNumObj.fourth}}題
+                </label>
+                <br />
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input"
+                        [(ngModel)]="chooseCategory.five" (ngModelChange)="ngOnChooseCategoryChanges($event)">
+                    第五類 , 共{{categoryNumObj.fifth}}題
+                </label>
+                <br />
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input"
+                        [(ngModel)]="chooseCategory.six" (ngModelChange)="ngOnChooseCategoryChanges($event)">
+                    第六類 , 共{{categoryNumObj.sixth}}題
+                </label>
+                <br />
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input"
+                        [(ngModel)]="chooseCategory.seven" (ngModelChange)="ngOnChooseCategoryChanges($event)">
+                    第七類 , 共{{categoryNumObj.seventh}}題
+                </label>
+                <br />
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input"
+                        [(ngModel)]="chooseCategory.eight" (ngModelChange)="ngOnChooseCategoryChanges($event)">
+                    第八類 , 共{{categoryNumObj.eighth}}題
+                </label>
+                <br />
+                <label class="form-check-label">
+                  <input type="checkbox" class="form-check-input"
+                      [(ngModel)]="chooseCategory.all" (ngModelChange)="ngOnChooseCategoryAllChange($event)">
+                  全選 , 共{{categoryNumObj.all}}題
+              </label>
+              <br />
+            </div>
+            <p style="color: red;" *ngIf="chooseCategoryError">請選擇要練習的大類</p>
+            <button type="button" name="" id="" class="btn btn-outline-primary btn-lg btn-block"
+                (click)="goToExam();">submit</button>
+        </div>
+    </div>
+</div>
