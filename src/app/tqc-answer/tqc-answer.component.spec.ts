@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import {HttpClientTestingModule , HttpTestingController} from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { TqcAnswerComponent } from './tqc-answer.component';
 
 describe('TqcAnswerComponent', () => {
@@ -8,6 +9,10 @@ describe('TqcAnswerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports : [
+        HttpClientTestingModule ,
+        RouterTestingModule
+      ],
       declarations: [ TqcAnswerComponent ]
     })
     .compileComponents();

@@ -17,31 +17,37 @@ export class TqcExamResultComponent implements OnInit {
     ngOnInit(): void {
         this.titleService.setTitle("電子商務TQC---練習題解答");
         this.resultData = this.appService.data;
-        for (let item of this.resultData) {
-            item.checkAnswer = item.checkAnswer.toString();
-            let type = Math.floor(Number(item.TYPE));
-            if (type ==1 ){
-                if (item.ANSWER == item.checkAnswer) {
-                    console.log("yes");
-                    item.isRight = true;
-                }
-            } else if (type ==2 ) {
-                let userAnswer = [];
-                for (let i = 1 ; i<=4 ; i++) {
-                    if (item[`checkAnswer${i}`]) {
-                        userAnswer.push(i);
+        try {
+            for (let item of this.resultData) {
+                item.checkAnswer = item.checkAnswer.toString();
+                let type = Math.floor(Number(item.TYPE));
+                if (type ==1 ){
+                    if (item.ANSWER == item.checkAnswer) {
+                        console.log("yes");
+                        item.isRight = true;
                     }
+                } else if (type ==2 ) {
+                    let userAnswer = [];
+                    for (let i = 1 ; i<=4 ; i++) {
+                        if (item[`checkAnswer${i}`]) {
+                            userAnswer.push(i);
+                        }
+                    }
+                    if (item.ANSWER == userAnswer.join('')) {
+                        console.log("yes");
+                        item.isRight = true;
+                    }
+                } else {
+                    item.isRight = false;
                 }
-                if (item.ANSWER == userAnswer.join('')) {
-                    console.log("yes");
-                    item.isRight = true;
-                }
-            } else {
-                item.isRight = false;
+            }
+            this.cloneData = _.cloneDeep(this.resultData);
+            this.isShowOnlyErrorAns = false;
+        } catch (e) {
+            if (e.message.includes('resultData')) {
+                this.router.navigate(['choose-tqc-exam']);
             }
         }
-        this.cloneData = _.cloneDeep(this.resultData);
-        this.isShowOnlyErrorAns = false;
     }
     onChangePage(pageOfItems: Array<any>) {
         // update current page of items
