@@ -1,15 +1,18 @@
-import { Component, OnInit, ViewChild, ViewChildren , QueryList } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren , QueryList, AfterViewInit } from '@angular/core';
 import { AppService } from '../app.service';
 import { Router , ParamMap  , ActivatedRoute} from '@angular/router';
 import { Location } from '@angular/common' 
 import { JwPaginationComponent } from '../jw-pagination/jw-pagination.component';
 import { Title } from '@angular/platform-browser';
+import {BlockUI , NgBlockUI} from 'ng-block-ui'
+import * as $ from 'jquery';
 @Component({
   selector: 'app-tqc-answer',
   templateUrl: './tqc-answer.component.html',
   styleUrls: ['./tqc-answer.component.css']
 })
-export class TqcAnswerComponent implements OnInit {
+export class TqcAnswerComponent implements OnInit  {
+  @BlockUI() blockUI : NgBlockUI;
   title = 'app';
   jsondata = [];
   data : any[] ;
@@ -28,6 +31,8 @@ export class TqcAnswerComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
+    this.blockUI.start("Loading...");
+    $('body').css('overflow' , 'hidden');
     this.titleService.setTitle("電子商務TQC---題庫");
     let examData = await this.appService.getExam();
     //let merge = _.merge(_.keyBy(ansData , 'tno') , _.keyBy(examData ,'TNO'));
@@ -35,9 +40,12 @@ export class TqcAnswerComponent implements OnInit {
     this.data = examData;
     this.nowPage = Number(this.route.snapshot.paramMap.get('id'));
     if (this.nowPage == 0) this.nowPage = 1;
+    setTimeout(()=> {
+      this.blockUI.stop();
+      $('body').css('overflow' , 'auto');
+    } , 1000)
     //console.log(this.nowPage);
   }
-  
   isAnswer(answer , index) {
     if  (answer.includes(index)) {
       return true;
