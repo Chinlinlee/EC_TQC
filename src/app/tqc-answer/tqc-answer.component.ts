@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewChildren , QueryList, AfterViewInit, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren , QueryList, AfterViewInit, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { AppService } from '../app.service';
 import { Router , ParamMap  , ActivatedRoute} from '@angular/router';
 import { Location } from '@angular/common' 
@@ -7,11 +7,12 @@ import { Title } from '@angular/platform-browser';
 import {BlockUI , NgBlockUI} from 'ng-block-ui'
 import * as $ from 'jquery';
 import * as _ from 'lodash';
-import { ChangeDetectionStrategy } from '@angular/compiler/src/compiler_facade_interface';
+
 @Component({
   selector: 'app-tqc-answer',
   templateUrl: './tqc-answer.component.html',
-  styleUrls: ['./tqc-answer.component.css']
+  styleUrls: ['./tqc-answer.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TqcAnswerComponent implements OnInit  {
   @BlockUI() blockUI : NgBlockUI;
@@ -19,13 +20,14 @@ export class TqcAnswerComponent implements OnInit  {
   title = 'app';
   jsondata = [];
   data : any[] ;
+  excelData : any[];
   pageOfItems: Array<any>;
   nowPage : Number;
   @ViewChildren(JwPaginationComponent) paginationChild : QueryList<JwPaginationComponent>;
   constructor(private appService : AppService , 
               private router : Router , 
               private route : ActivatedRoute ,  
-              localtion: Location ,  
+              private location: Location ,  
               private titleService : Title,
               private appSerive: AppService,
               private cdr: ChangeDetectorRef
@@ -47,8 +49,8 @@ export class TqcAnswerComponent implements OnInit  {
     let examData = await this.appService.getExam();
     //let merge = _.merge(_.keyBy(ansData , 'tno') , _.keyBy(examData ,'TNO'));
     //let values = _.values(merge);
-    this.data = examData;
-    console.log(this.data);
+    this.excelData = examData;
+    this.data = _.cloneDeep(examData);
     this.nowPage = Number(this.route.snapshot.paramMap.get('id'));
     if (this.nowPage == 0) this.nowPage = 1;
     setTimeout(()=> {
@@ -67,6 +69,18 @@ export class TqcAnswerComponent implements OnInit  {
       eight : false ,
       all   : false
     };
+    let userChooseCategoryLocalStorage  = JSON.parse(localStorage.getItem("chooseCategoryInAnswerPage"));
+    if (userChooseCategoryLocalStorage) {
+      for (let index in userChooseCategoryLocalStorage) {
+        let category = userChooseCategoryLocalStorage[index];
+        if (category === "true")  {
+          category = true; 
+        } else {
+          category = false; 
+        }
+      }
+      this.chooseCategory = userChooseCategoryLocalStorage;
+    }
   }
   isAnswer(answer , index) {
     if  (answer.includes(index)) {
@@ -79,7 +93,8 @@ export class TqcAnswerComponent implements OnInit  {
     console.log(pageOfItems);
     this.pageOfItems = pageOfItems;
     this.router.onSameUrlNavigation = 'reload';
-    this.router.navigate(['/tqc-answer' , pageOfItems["nowPage"]]);
+    //this.router.navigate(['' , pageOfItems["nowPage"]], {relativeTo: this.route , queryParams: {id : pageOfItems["nowPage"]}});
+    this.location.go(`/tqc-answer/${pageOfItems["nowPage"]}`);
   }
   goToExcelBody () : void {
     this.appService.setItem([1, 2 , 3]);
@@ -96,6 +111,19 @@ export class TqcAnswerComponent implements OnInit  {
       this.chooseCategory["all"] = false;
     }
     this.refreshExamByChosen();
+    localStorage.setItem("chooseCategoryInAnswerPage", JSON.stringify(this.chooseCategory));
+  }
+  ngOnChooseCategoryAllChange (changes : SimpleChanges) : void {
+    if (this.chooseCategory["all"] == true) {
+      for (let key in this.chooseCategory) {
+        this.chooseCategory[key] = true;
+      } 
+    } else {
+      for (let key in this.chooseCategory) {
+        this.chooseCategory[key] = false;
+      } 
+    }
+    //this.refreshExamByChosen();
   }
   async refreshExamByChosen() : Promise<any> {
     let keymap = {
@@ -107,7 +135,7 @@ export class TqcAnswerComponent implements OnInit  {
       "six"   : this.appService.getExamInCategory(6) ,
       "seven" : this.appService.getExamInCategory(7) ,
       "eight" : this.appService.getExamInCategory(8) ,
-      "all"   : []
+      "all"   : (() => {return this.excelData})()
     }
     let chosenExam = [];
     for (let key in this.chooseCategory) {
@@ -122,8 +150,6 @@ export class TqcAnswerComponent implements OnInit  {
       filterItem.push(...specificItem);
     }
     this.data = filterItem;
-    console.log(this.data);
-    this.cdr.detectChanges();
   } 
 
 }
