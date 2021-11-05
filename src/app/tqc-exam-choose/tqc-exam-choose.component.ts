@@ -5,6 +5,9 @@ import * as _ from 'lodash';
 import { SimpleChanges } from '@angular/core';
 import * as $ from 'jquery';
 import { AppService } from '../app.service';
+import { BlockUI  , NgBlockUI} from 'ng-block-ui';
+import { of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 @Component({
   templateUrl: './tqc-exam-choose.component.html',
   styleUrls: ['./tqc-exam-choose.component.css']
@@ -18,6 +21,7 @@ export class TqcExamChooseComponent implements OnInit {
   chooseNum : number;
   categoryNumObj : Object = {
     "first"   : 0 ,
+    "second"  : 0 ,
     "thirth"  : 0 ,
     "fourth"  : 0 ,
     "fifth"   : 0 ,
@@ -26,9 +30,11 @@ export class TqcExamChooseComponent implements OnInit {
     "eight"   : 0 ,
     "all"     : 0
   };
+  @BlockUI() blockUI : NgBlockUI;
   constructor(private router : Router , private TqcExanChooseService : TqcExamChooseService , private appService : AppService) { }
 
   async ngOnInit(): Promise<void> {
+    this.blockUI.start("Loading");
     this.examNumError = false;
     this.chooseCategoryError = true;
     this.examNum = 0;
@@ -43,6 +49,15 @@ export class TqcExamChooseComponent implements OnInit {
       eight : false ,
       all   : false
     };
+    console.log("test");
+   /* setTimeout(()=> {
+      this.blockUI.stop();
+    } , 1000);*/
+    of(true).pipe(
+      delay(1500)
+    ).subscribe(()=>{
+      this.blockUI.reset();
+    });
   }
   async ngAfterViewInit(): Promise<void> {
     //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
@@ -120,7 +135,7 @@ export class TqcExamChooseComponent implements OnInit {
     
     
     let keymap = {
-      "one"   : this.appService.getFifthCategoryExam() , 
+      "one"   : this.appService.getFirstCategoryExam() , 
       "two"   : this.appService.getSecondCategoryExam(),
       "three" : this.appService.getThirdCategoryExam() ,
       "four"  : this.appService.getFourthCategoryExam() ,
@@ -130,7 +145,7 @@ export class TqcExamChooseComponent implements OnInit {
       "eight" : this.appService.getEighthCategoryExam() ,
       "all"   : []
     }
-    this.appService.getFifthCategoryExam();
+    //this.appService.getFifthCategoryExam();
     let choosedNum = [];
     for (let key in this.chooseCategory) {
       if (this.chooseCategory[key]) {
@@ -139,9 +154,10 @@ export class TqcExamChooseComponent implements OnInit {
     }
     let data = [];
     for (let i = 0 ; i < choosedNum.length ; i++) {
-      let specificItem= await choosedNum[i];
+      let specificItem = await choosedNum[i];
       data.push(...specificItem);
     }
+    console.log(data.length);
     this.chooseNum = data.length;
     if (this.examNum > this.chooseNum) {
       this.chooseNumError = true;

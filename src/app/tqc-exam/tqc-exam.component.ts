@@ -5,6 +5,7 @@ import { JwPaginationComponent } from '../jw-pagination/jw-pagination.component'
 import * as _ from 'lodash';
 import { Title } from '@angular/platform-browser';
 import { TqcExamChooseService } from '../tqc-exam-choose/tqc-exam-choose.service';
+import { BlockUI , NgBlockUI} from 'ng-block-ui';
 @Component({
   templateUrl: './tqc-exam.component.html',
   styleUrls: ['./tqc-exam.component.css'] 
@@ -15,12 +16,14 @@ export class TqcExamComponent implements OnInit , AfterViewInit {
   pageOfItems: Array<any>;
   @ViewChild(JwPaginationComponent) 
   private paginationChild : JwPaginationComponent;
+  @BlockUI() blockUI : NgBlockUI
   constructor(private appService : AppService , private router : Router , private route : ActivatedRoute ,private tqcExamChooseSerive : TqcExamChooseService , private titleService : Title) { 
       
   }
   async ngOnInit(): Promise<void> {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
+    this.blockUI.start("Loading...");
     this.titleService.setTitle("電子商務TQC---練習題");
     let examData = this.tqcExamChooseSerive.data;
     //let merge = _.merge(_.keyBy(ansData , 'tno') , _.keyBy(examData ,'TNO'));
@@ -40,6 +43,10 @@ export class TqcExamComponent implements OnInit , AfterViewInit {
       item.checkAnswer4 = false;
       item.checkAnswer = false;
     }
+    
+    setTimeout(()=> {
+      this.blockUI.stop();
+    } , 1500);
   }
   ngAfterViewInit(): void {
     //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.

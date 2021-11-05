@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewChildren , QueryList, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren , QueryList, AfterViewInit, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { AppService } from '../app.service';
 import { Router , ParamMap  , ActivatedRoute} from '@angular/router';
 import { Location } from '@angular/common' 
@@ -6,6 +6,8 @@ import { JwPaginationComponent } from '../jw-pagination/jw-pagination.component'
 import { Title } from '@angular/platform-browser';
 import {BlockUI , NgBlockUI} from 'ng-block-ui'
 import * as $ from 'jquery';
+import * as _ from 'lodash';
+import { ChangeDetectionStrategy } from '@angular/compiler/src/compiler_facade_interface';
 @Component({
   selector: 'app-tqc-answer',
   templateUrl: './tqc-answer.component.html',
@@ -13,19 +15,27 @@ import * as $ from 'jquery';
 })
 export class TqcAnswerComponent implements OnInit  {
   @BlockUI() blockUI : NgBlockUI;
+  chooseCategory : Object;
   title = 'app';
   jsondata = [];
   data : any[] ;
   pageOfItems: Array<any>;
   nowPage : Number;
   @ViewChildren(JwPaginationComponent) paginationChild : QueryList<JwPaginationComponent>;
-  constructor(private appService : AppService , private router : Router , private route : ActivatedRoute , localtion: Location ,  private titleService : Title ) {
+  constructor(private appService : AppService , 
+              private router : Router , 
+              private route : ActivatedRoute ,  
+              localtion: Location ,  
+              private titleService : Title,
+              private appSerive: AppService,
+              private cdr: ChangeDetectorRef
+  ) {
     this.route.paramMap.subscribe( paramMap => {
         this.nowPage = Number(paramMap.get('id'));
         if (this.nowPage == 0) this.nowPage = 1;
         //console.log(this.nowPage);
         this.ngOnInit();
-    })
+    });
   }
 
   async ngOnInit(): Promise<void> {
@@ -38,6 +48,7 @@ export class TqcAnswerComponent implements OnInit  {
     //let merge = _.merge(_.keyBy(ansData , 'tno') , _.keyBy(examData ,'TNO'));
     //let values = _.values(merge);
     this.data = examData;
+    console.log(this.data);
     this.nowPage = Number(this.route.snapshot.paramMap.get('id'));
     if (this.nowPage == 0) this.nowPage = 1;
     setTimeout(()=> {
@@ -45,6 +56,17 @@ export class TqcAnswerComponent implements OnInit  {
       $('body').css('overflow' , 'auto');
     } , 1000)
     //console.log(this.nowPage);
+    this.chooseCategory = {
+      one   : false , 
+      two   : false ,
+      three : false ,
+      four  : false ,
+      five  : false ,
+      six   : false ,
+      seven : false ,
+      eight : false ,
+      all   : false
+    };
   }
   isAnswer(answer , index) {
     if  (answer.includes(index)) {
@@ -54,7 +76,7 @@ export class TqcAnswerComponent implements OnInit  {
   }
   onChangePage(pageOfItems: Array<any>) {
     // update current page of items
-    
+    console.log(pageOfItems);
     this.pageOfItems = pageOfItems;
     this.router.onSameUrlNavigation = 'reload';
     this.router.navigate(['/tqc-answer' , pageOfItems["nowPage"]]);
@@ -63,4 +85,45 @@ export class TqcAnswerComponent implements OnInit  {
     this.appService.setItem([1, 2 , 3]);
     this.router.navigate(['/excel-body']);
   }
+
+  ngOnChooseCategoryChanges(changes: SimpleChanges): void {
+    //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
+    //Add '${implements OnChanges}' to the class.
+    let item = _.pickBy(this.chooseCategory , v=>!v);
+    if (Object.keys(item).length == 1 && item["all"] == false) {
+      this.chooseCategory["all"] = true;
+    } else {
+      this.chooseCategory["all"] = false;
+    }
+    this.refreshExamByChosen();
+  }
+  async refreshExamByChosen() : Promise<any> {
+    let keymap = {
+      "one"   : this.appService.getExamInCategory(1),
+      "two"   : this.appService.getExamInCategory(2),
+      "three" : this.appService.getExamInCategory(3) ,
+      "four"  : this.appService.getExamInCategory(4) ,
+      "five"  : this.appService.getExamInCategory(5) ,
+      "six"   : this.appService.getExamInCategory(6) ,
+      "seven" : this.appService.getExamInCategory(7) ,
+      "eight" : this.appService.getExamInCategory(8) ,
+      "all"   : []
+    }
+    let chosenExam = [];
+    for (let key in this.chooseCategory) {
+      if (this.chooseCategory[key]) {
+        chosenExam.push(keymap[key]);
+      }
+    }
+    //this.data = [];
+    let filterItem = [];
+    for (let i = 0 ; i < chosenExam.length ; i++) {
+      let specificItem = await chosenExam[i];
+      filterItem.push(...specificItem);
+    }
+    this.data = filterItem;
+    console.log(this.data);
+    this.cdr.detectChanges();
+  } 
+
 }

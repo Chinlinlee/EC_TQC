@@ -35,6 +35,11 @@ export class AppService {
         let data = await this.getExam();
         return data.length;
     }
+    async getExamInCategory(category: Number) : Promise<any>{
+        let data = await this.getExam();
+        data = _.filter(data, v=> v.TNO[3] == category);
+        return data;
+    }
     async getFirstCategoryExam() : Promise<any> {
         let data = await this.getExam();
         data = _.filter(data , v=> v.TNO[3] == 1)

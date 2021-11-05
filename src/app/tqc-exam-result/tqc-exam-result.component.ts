@@ -3,7 +3,9 @@ import { AppService } from '../app.service';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
 import { Title } from '@angular/platform-browser';
-
+import { BlockUI , NgBlockUI } from 'ng-block-ui';
+import { delay } from 'rxjs/operators';
+import { of } from 'rxjs';
 @Component({
     templateUrl: './tqc-exam-result.component.html',
     styleUrls: ['./tqc-exam-result.component.css']
@@ -13,8 +15,10 @@ export class TqcExamResultComponent implements OnInit {
     cloneData : Array<any>;
     pageOfItems: Array<any>;
     isShowOnlyErrorAns : Boolean ;
+    @BlockUI() blockUI : NgBlockUI;
     constructor(private appService: AppService, private router: Router , private titleService : Title) { }
     ngOnInit(): void {
+        this.blockUI.start("Loading");
         this.titleService.setTitle("電子商務TQC---練習題解答");
         this.resultData = this.appService.data;
         try {
@@ -43,6 +47,16 @@ export class TqcExamResultComponent implements OnInit {
             }
             this.cloneData = _.cloneDeep(this.resultData);
             this.isShowOnlyErrorAns = false;
+            //of(true) obeservable
+            //pipe(delay(1000)) operator
+            //subscribetion
+            //this.blockUI.stop() Observe
+            of(true).pipe(delay(1000)).subscribe(()=> {
+                this.blockUI.stop();
+            });
+            /*setTimeout(()=> {
+                this.blockUI.stop();
+            } , 1000);*/
         } catch (e) {
             if (e.message.includes('resultData')) {
                 this.router.navigate(['choose-tqc-exam']);
