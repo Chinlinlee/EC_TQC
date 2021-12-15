@@ -34,7 +34,11 @@ export class TqcAnswerComponent implements OnInit  {
   ) {
     this.route.paramMap.subscribe( paramMap => {
         this.nowPage = Number(paramMap.get('id'));
-        if (this.nowPage == 0) this.nowPage = 1;
+        if (this.nowPage == 0) {
+          this.nowPage = 1;
+          this.location.go(`/tqc-answer/1`);
+        }
+        
         //console.log(this.nowPage);
         this.ngOnInit();
     });
